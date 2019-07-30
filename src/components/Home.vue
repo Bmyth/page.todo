@@ -336,7 +336,7 @@ export default {
       if(task.child && task.child.length > 0){
         let n = 0;
         task.child.forEach((i) => {
-          if(i.finish != true){
+          if(i.finish == true){
             n = n + 1;
           }
         })
