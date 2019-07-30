@@ -39,7 +39,8 @@ const store = new Vuex.Store({
 			Onion.updateTask(state.tasks, task);
 			Onion.save('tasks', state.tasks);
 			if(task.finish !== undefined){
-				Onion.clearCurrentIndex(state.tasks, state.currentTaskIndex);
+				state.currentTaskIndex = Onion.clearCurrentIndex(state.tasks, state.currentTaskIndex);
+				Onion.save('currentTaskIndex', state.currentTaskIndex)
 			}
 		},
 		taskPrepend (state, params) {
@@ -52,7 +53,7 @@ const store = new Vuex.Store({
 					text: params.text
 				}
 				parentTask.child.unshift(task);
-				Onion.sortTasksByStatus(parentTask.child);
+				Onion.sortTasksByStatus(parentTask.child, 'finishAtHead');
 				Onion.save('tasks', state.tasks);
 
 				let i = state.currentTaskIndex.findIndex((i) => {return i.id == params.originId})
@@ -70,7 +71,9 @@ const store = new Vuex.Store({
 			params.finish = true;
 			Onion.updateTask(state.tasks, params);
 			Onion.save('tasks', state.tasks);
+
 			state.currentTaskIndex = Onion.clearCurrentIndex(state.tasks, state.currentTaskIndex);
+			Onion.save('currentTaskIndex', state.currentTaskIndex)
 		},
 		taskPutBack (state, params) {
 			let i = state.currentTaskIndex.findIndex((i) => {return i.id == params.id})

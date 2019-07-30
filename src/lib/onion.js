@@ -34,7 +34,7 @@ Onion.addTask = function(tasks, task){
 		var p = tasks.find((i) => {return i.id == task.parentId});
 		p.child = p.child || [];
 		p.child.unshift(task);
-		Onion.sortTasksByStatus(p.child);
+		Onion.sortTasksByStatus(p.child, 'child');
 	}else{
 		tasks.unshift(task);
 		Onion.sortTasksByStatus(tasks);
@@ -45,6 +45,7 @@ Onion.updateTask = function(tasks, task){
 	var p = null;
 	var idx = 0;
 	var t = null;
+	//index
 	if(task.parentId){
 		p = tasks.find((i) => {return i.id == task.parentId});
 		idx = p.child.findIndex((i) => {return i.id == task.id});
@@ -53,15 +54,21 @@ Onion.updateTask = function(tasks, task){
 		idx = tasks.findIndex((i) => {return i.id == task.id}) 
 		t = tasks[idx];
 	}
+
+	//update
 	t.text = task.text;
 	if(task.finish !== undefined){
 		t.finish = task.finish;
-		if(p){
-			Onion.sortTasksByStatus(p.child);
-		}else{
-			Onion.sortTasksByStatus(tasks);
-		}
 	}
+
+	//sort
+	if(p){
+		Onion.sortTasksByStatus(p.child, 'child');
+	}else{
+		Onion.sortTasksByStatus(tasks);
+	}
+
+	//update parent
 	if(task.updateParentId){
 		var newP = tasks.find((i) => {return i.id == task.updateParentId});
 		if(p){
@@ -71,7 +78,7 @@ Onion.updateTask = function(tasks, task){
 		}
 		newP.child = newP.child || [];
 		newP.child.unshift(t);
-		Onion.sortTasksByStatus(newP.child);
+		Onion.sortTasksByStatus(newP.child, 'child');
 	}
 }
 
@@ -90,24 +97,26 @@ Onion.deleteTask = function(tasks, task){
 	}
 }
 
-Onion.sortTasksByStatus = function(tasks){
-	tasks = tasks.sort((a, b) => {
-		let va = a.finish ? 0 : 1;
-		let vb = b.finish ? 0 : 1;
+Onion.sortTasksByStatus = function(tasks, child){
+	let n = child ? 1 : -1;
+	tasks.sort((a, b) => {
+		let va = a.finish ? 0 : n;
+		let vb = b.finish ? 0 : n;
 		return va - vb;
 	})
 }
 
 Onion.clearCurrentIndex = function(tasks, currentIndex){
 	let l = currentIndex.length;
-	let a = currentIndex.filter((i) => {
+	currentIndex = currentIndex.filter((i) => {
 		let t = Onion.getTask(tasks, i.id, i.parentId)
 		return !t.finish
 	})
-	if(l != a.length){
+
+	if(l != currentIndex.length){
 		Onion.save('currentTaskIndex', currentIndex)
 	}
-	return a;
+	return currentIndex;
 }
 
 export default Onion;

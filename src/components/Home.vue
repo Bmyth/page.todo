@@ -15,6 +15,7 @@
       <v-list two-line>
         <v-list-item-group multiple active-class="pink--text">
           <template v-for="(task, index) in currentTasks">
+            <p :key="task.id" v-if="task.parentId" class="parent-task-text">{{taskParentText(task.parentId)}}</p>
             <v-list-item :key="task.id">
               <v-list-item-content>
                 <v-list-item-title class="text-left">
@@ -58,7 +59,7 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-list-item @click="showTaskPrepend">
+            <v-list-item v-show="showPrependOpt()" @click="showTaskPrepend">
               <v-list-item-icon>
                 <v-icon color="purple">mdi-lightbulb-on-outline</v-icon>
               </v-list-item-icon>
@@ -146,7 +147,7 @@
     <v-dialog v-model="showTaskPoolDlg" fullscreen hide-overlay transition="dialog-bottom-transition">
       <v-card>
         <v-toolbar dark color="pink">
-          <v-btn icon dark @click="showTaskPoolDlg = false">
+          <v-btn icon dark @click="showTaskPoolDlg = false; view = 'current'">
             <v-icon>mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title>All Tasks</v-toolbar-title>
@@ -155,25 +156,21 @@
             <v-icon>mdi-plus</v-icon>
           </v-btn>
         </v-toolbar>
-        <v-card class="my-0 task-card" v-for="(task, index) in tasks" :key="index" :class="taskCardClass(task)" @click="onClickTaskItem(task)">
+        <v-card class="task-card" v-for="(task, index) in tasks" :key="index" :class="taskCardClass(task)" @click="onClickTaskItem(task)">
+          <v-card-text class="top-task-text">
+            {{task.text}}
+          </v-card-text>
           <v-card-text class="task-text">
             <p>
-              <v-icon color="pink" class="flag">mdi-flag</v-icon>
-              {{task.text}}
+              {{topTaskText(task)}}
               <span>{{progressText(task)}}</span>
             </p>
           </v-card-text>              
-          <v-card-text class="top-task-text">
-            <p>{{topTaskText(task)}}</p>
-          </v-card-text>
           <v-card-text class="task-children">
-            <v-divider v-if="index + 1 < tasks.length" :key="index"></v-divider>
-            <v-chip class="ma-2" left outlined v-for="(childTask, index) in task.child" :key="index" label color="grey" darken-2 :class="taskClass(childTask)" @click.stop="showTaskOpt(childTask)">
-              <v-icon color="pink" class="flag">mdi-flag</v-icon>
+            <v-chip class="mx-1 my-2" left outlined v-for="(childTask, index) in task.child" :key="index" label color="grey" :class="taskClass(childTask)" @click.stop="showTaskOpt(childTask)">
               {{childTask.text}}
             </v-chip>
-            <v-chip class="ma-2" color="grey" darken-2 outlined label @click.stop="showTaskOpt(task)" :class="taskClass(task)">
-              <v-icon color="pink" class="flag">mdi-flag</v-icon>
+            <v-chip class="mx-1 my-2 final" color="grey" outlined label @click.stop="showTaskOpt(task)" :class="taskClass(task)">
               {{task.text}}
             </v-chip>
           </v-card-text>
@@ -238,6 +235,7 @@ export default {
       this.showTaskOptDlg = true; 
     },
     showTaskCreate(){
+      this.onEditTask = null;
       this.onEditTaskText = '';
       this.onEditTaskParentId = 'na';
       this.openTaskEditDlg('create');
@@ -349,6 +347,10 @@ export default {
       }
       return ''
     },
+    taskParentText(parentId){
+      let t = this.tasks.find((i) => { return i.id == parentId});
+      return t.text;
+    },
     showNextTimeOpt(){
       return this.view == 'current';
     },
@@ -376,6 +378,9 @@ export default {
         return false;
       }
       return true;
+    },
+    showPrependOpt(){
+      return this.onEditTask && this.onEditTask.finish != true;
     }
   },
   watch: {
@@ -402,24 +407,31 @@ export default {
   .v-list-item__title{
     color: #444;
   }
+  .v-list-item{
+    /*border-top: 1px solid #ddd;*/
+  }
+  .parent-task-text{
+    background: #e91e63;
+    color: #fff;
+    padding: 2px 16px;
+    margin: 0;
+    font-size: 14px;
+    width: 82%;
+    border-radius: 10px 10px 0 0;
+  }
   .task-card{
-    border-top: 1px solid #ddd; 
+    border-top: 1px solid #eee; 
     .top-task-text{
       display: none;
       background: #e91e63;
       color: #fff;
-      padding-top: 8px;
-      padding-bottom: 8px;
-      /*border-top: 1px solid #ccc;*/
-      position: relative;
-      left: 20%;
-      width: 80%;
-      border-radius: 20px 0 0 20px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      width: 82%;
+      margin: 0;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0 !important;
       font-size: 14px; 
-      transition: all .2s;
-      -moz-transition: all .2s; /* Firefox 4 */
-      -webkit-transition: all .2s; /* Safari 和 Chrome */
-      -o-transition: all .2s; /* Opera */
       p{
         margin: 0;
         padding-right: 32px;
@@ -459,34 +471,35 @@ export default {
         top: -12px;
       }
     }
+    &.finish{
+      .task-text{
+        border-left: 6px solid #66BB6A;
+      }
+    }
     &.in-current-list{
-      .task-text .flag{
-        display: block;
+      .task-text{
+        border-left: 6px solid #40C4FF;
       }
     }
     &.has-todo-child{
+      border-top: none;
       .top-task-text{
         display: block;
       }
       .task-text{
-        padding-bottom: 8px;
+        border-top: 1px solid #eee;
       }
     }
     &.expand{
       .task-children{
         height: auto;
+        border-top: 1px solid #ddd;
       }
       .task-text{
-        background: #e91e63;
-        color: #fff;
-        border-radius: 0;
-      }
-      .top-task-text{
         display: none;
       }
     }
   } 
-
   .task-children{
     height: 0;
     overflow: hidden;
@@ -503,16 +516,16 @@ export default {
       top: -2px;
     }
     &.finish{
-      border: 1px solid green !important;
-      color: green !important;
+      border-left: 4px solid #66BB6A !important;
     }
     &.in-current-list{
-      .flag{
-        display: block;
-      }
+      border-left: 4px solid #40C4FF !important;
+    }
+    &.final{
+      border-left: 4px solid #e91e63 !important;
     }
   }
   .v-card--link.task-card:before{
     background: transparent;
-  } 
+  }
 </style>
