@@ -15,7 +15,7 @@
       <v-list two-line>
         <v-list-item-group multiple active-class="pink--text">
           <template v-for="(task, index) in currentTasks">
-            <p :key="task.id" v-if="task.parentId" class="parent-task-text">{{taskParentText(task.parentId)}}</p>
+            <p :key="'_' + task.id" v-if="task.parentId" class="parent-task-text">{{taskParentText(task.parentId)}}</p>
             <v-list-item :key="task.id">
               <v-list-item-content>
                 <v-list-item-title class="text-left">
@@ -146,7 +146,7 @@
 
     <v-dialog v-model="showTaskPoolDlg" fullscreen hide-overlay transition="dialog-bottom-transition">
       <v-card>
-        <v-toolbar dark color="pink">
+        <v-toolbar dark color="pink" class="mb-2">
           <v-btn icon dark @click="showTaskPoolDlg = false; view = 'current'">
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -204,6 +204,11 @@ export default {
       let t =  this.$store.state.tasks.map((i) => {
         return {text: i.text, value: i.id}
       })
+      if(this.onEditTask){
+        t = t.filter((i) => {
+          return i.id == this.onEditTask.id;
+        })
+      }
       t.unshift({text: "It's the final task", value: 'na'})
       return t;
     },

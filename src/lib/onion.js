@@ -41,7 +41,7 @@ Onion.addTask = function(tasks, task){
 	}
 }
 
-Onion.updateTask = function(tasks, task){
+Onion.updateTask = function(tasks, task, currentIndex){
 	var p = null;
 	var idx = 0;
 	var t = null;
@@ -54,7 +54,6 @@ Onion.updateTask = function(tasks, task){
 		idx = tasks.findIndex((i) => {return i.id == task.id}) 
 		t = tasks[idx];
 	}
-
 	//update
 	t.text = task.text;
 	if(task.finish !== undefined){
@@ -76,6 +75,14 @@ Onion.updateTask = function(tasks, task){
 		}else{
 			t = tasks.splice(idx, 1);
 		}
+		t = t[0];
+		t.parentId = task.updateParentId;
+
+		//sync to index
+		var taskIndex = currentIndex.find((i) => {return i.id == task.id})
+		taskIndex.parentId = t.parentId;
+		Onion.save('currentTaskIndex', currentIndex)
+
 		newP.child = newP.child || [];
 		newP.child.unshift(t);
 		Onion.sortTasksByStatus(newP.child, 'child');

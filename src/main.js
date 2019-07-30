@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
 import Home from './components/Home.vue';
+import Backdoor from './components/Backdoor.vue';
 import store from './store';
 
 Vue.config.productionTip = false
@@ -11,7 +12,8 @@ Vue.use(VueRouter);
 
 let router = new VueRouter({
     routes: [
-        { path: '/', component: Home }
+        { path: '/', component: Home },
+        { path: '/backdoor', component: Backdoor }
     ]
 });
 

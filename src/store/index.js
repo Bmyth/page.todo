@@ -36,7 +36,7 @@ const store = new Vuex.Store({
 			}
 		},
 		taskUpdate (state, task) {
-			Onion.updateTask(state.tasks, task);
+			Onion.updateTask(state.tasks, task, state.currentTaskIndex);
 			Onion.save('tasks', state.tasks);
 			if(task.finish !== undefined){
 				state.currentTaskIndex = Onion.clearCurrentIndex(state.tasks, state.currentTaskIndex);
@@ -69,7 +69,7 @@ const store = new Vuex.Store({
 		},
 		taskFinish (state, params) {
 			params.finish = true;
-			Onion.updateTask(state.tasks, params);
+			Onion.updateTask(state.tasks, params, state.currentTaskIndex);
 			Onion.save('tasks', state.tasks);
 
 			state.currentTaskIndex = Onion.clearCurrentIndex(state.tasks, state.currentTaskIndex);
