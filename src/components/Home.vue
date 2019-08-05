@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card max-width="900" class="mx-auto">
+    <v-card max-width="900" class="mx-auto current-container">
       <v-toolbar color="pink" dark>
         <v-toolbar-title>Todo List</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -12,7 +12,7 @@
         </v-btn>
       </v-toolbar>
 
-      <v-list two-line>
+      <v-list two-line class="current-list">
         <v-list-item-group multiple active-class="pink--text">
           <template v-for="(task, index) in currentTasks">
             <p :key="'_' + task.id" v-if="task.parentId" class="parent-task-text">{{taskParentText(task.parentId)}}</p>
@@ -144,9 +144,9 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="showTaskPoolDlg" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <v-dialog v-model="showTaskPoolDlg" fullscreen hide-overlay transition="dialog-bottom-transition" class="task-pool">
       <v-card>
-        <v-toolbar dark color="pink" class="mb-2">
+        <v-toolbar dark color="pink" class="mb-3">
           <v-btn icon dark @click="showTaskPoolDlg = false; view = 'current'">
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -398,45 +398,58 @@ export default {
 </script>
 
 <style scoped lang="scss" rel="stylesheet/scss">
-  .v-list-item:before{
-    /*background: transparent;*/
+  .current-container{
+    box-shadow: none;
   }
-  .task-opts{
-    display: none;
-  }
-  .v-list-item:hover{
+  .current-list{
+    background: #fafafa;
+    padding-bottom: 0;
+    .v-list-item:before{
+      background: transparent;
+    }
     .task-opts{
-      display: inline;
+      display: none;
+    }
+    .v-list-item:hover{
+      .task-opts{
+        display: inline;
+      }
+    }
+    .v-list-item__title{
+      color: #444;
+    }
+    .v-list-item{
+      background: #fff;
+      margin-bottom: 12px;
+      box-shadow: 0px 2px 2px -1px rgba(0, 0, 0, 0.1), 0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
     }
   }
-  .v-list-item__title{
-    color: #444;
-  }
-  .v-list-item{
-    /*border-top: 1px solid #ddd;*/
-  }
   .parent-task-text{
-    background: #e91e63;
+    background: #555;
     color: #fff;
     padding: 2px 16px;
     margin: 0;
     font-size: 14px;
-    width: 82%;
-    border-radius: 10px 10px 0 0;
+    width: 100%;
+    text-align: right;
+/*    border-radius: 10px 10px 0 0;*/
   }
+
   .task-card{
     border-top: 1px solid #eee; 
+    margin-bottom: 12px;
+    border-radius: 0 !important;
     .top-task-text{
       display: none;
-      background: #e91e63;
+      background: #555;
       color: #fff;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      width: 82%;
+      padding: 2px 16px;
+      width: 100%;
       margin: 0;
       border-bottom: none;
-      border-radius: 10px 10px 0 0 !important;
       font-size: 14px; 
+      border-radius: 0 !important;
+      text-align: right;
       p{
         margin: 0;
         padding-right: 32px;
@@ -491,14 +504,10 @@ export default {
       .top-task-text{
         display: block;
       }
-      .task-text{
-        border-top: 1px solid #eee;
-      }
     }
     &.expand{
       .task-children{
         height: auto;
-        border-top: 1px solid #ddd;
       }
       .task-text{
         display: none;
@@ -520,14 +529,14 @@ export default {
       left: -0;
       top: -2px;
     }
+    &.final{
+      border-left: 4px solid #555 !important;
+    }
     &.finish{
       border-left: 4px solid #66BB6A !important;
     }
     &.in-current-list{
       border-left: 4px solid #40C4FF !important;
-    }
-    &.final{
-      border-left: 4px solid #e91e63 !important;
     }
   }
   .v-card--link.task-card:before{
